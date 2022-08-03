@@ -22,7 +22,7 @@ for (x in unique_ratCat){
 }
 print(paste(length(combos),"unique combos"))
 
-#filter into smaller dfs that meet prior conditions
+#filter into smaller dfs that meet prior conditions 
 selectFilter = function(df,params){
   result=list(df%>%
     filter(ratCat == params[[1]], liqCat == params[[2]], matCat == params[[3]]) %>% 
