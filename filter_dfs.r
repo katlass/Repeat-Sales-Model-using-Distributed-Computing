@@ -1,10 +1,10 @@
 #Loading Data
-b=read_fst("sample.fst")
 
 # tmpData=read_fst("tmpData.fst")
 # #make a 50,000,000 row dummy to work with 
 # b=purrr::map_dfr(seq_len(500), ~tmpData)
 # #fst::write_fst(b, 'sample.fst') #read it later
+b=read_fst("sample.fst")
 
 #get unique categories
 unique_ratCat=unique(b$ratCat)
@@ -61,19 +61,20 @@ filter_seq= function(ncores,combos,data){
 }
 
 # Benchmark
-# print("Evaluating sequential vs parallel")
-# microbenchmark(filter_seq(ncores,combos,data=b), 
-#                filter_par(ncores, combos,data=b), #takes about 70 seconds
-#                times = 1)
-# print("Done Evaluating sequential vs parallel")
-# 
-print("True filtering")
+print("Evaluating sequential vs parallel")
+microbenchmark(filter_seq(ncores,combos,data=b), 
+                filter_par(ncores, combos,data=b), #takes about 70 seconds
+                times = 1)
+print("Done Evaluating sequential vs parallel")
+ 
 #filter into dataframes meeting unique conditions
+print("True filtering")
 tic()
 dfs=filter_par(ncores, combos,data=b)
 toc()
 print("True filtering done")
 
+#rating/liquidity/maturity combos in order, dfs in order
 combo_names=lapply(dfs,function(x) return(c(paste(x[1,4:6]))))
 dfs=lapply(dfs,function(x) return(select(x,c('cusip', 'trade_date', 'y'))))
 
