@@ -1,16 +1,6 @@
 data_dir="your datat dir here"
 
-#Parallel call
-main =function(dataframes,values,dir){
-  iterations=length(dataframes)
-  id=Sys.getpid()
-  saveRDS(dataframes,paste0(dir,id,".RDS"))
-  for (x in 1:iterations){
-    computeResidualReturn(dataframes[[x]],values=x,dir)
-  }
-}
-  
-
+#Setting up the billion item matrices to be used in regression
 computeResidualReturn = function(dt, values,dir,trimOutliers = NULL,sparse =TRUE) {
   # Create date index mapping for simplicity
   df_dates = tibble(
@@ -61,7 +51,6 @@ computeResidualReturn = function(dt, values,dir,trimOutliers = NULL,sparse =TRUE
   }
 
   # OR Fill in time matrix as matrix
-  library(tictoc)
   MatrixMaker = function(timeIdx,dt){
     time_matrix = array(0, dim = c(nrow(dt), time_diff + 1))
    # colnames(time_matrix) = paste0("time_", seq(time_start, time_end))
@@ -69,13 +58,13 @@ computeResidualReturn = function(dt, values,dir,trimOutliers = NULL,sparse =TRUE
       # If column value is between start and end, set to 1 otherwise 0
       idx = dt$t0 < timeIdx[tm] & dt$t1 >= timeIdx[tm]
       time_matrix[idx, tm] = 1
-      #  time_matrix[df_tmp$t0 == tm, tm - time_start] <- -1
+      #This is an alternate methodology for a repeat sales model
+      #  time_matrix[df_tmp$t0 == tm, tm - time_start] <- -1 
       #  time_matrix[df_tmp$t1 == tm, tm - time_start] <- 1
     }
     return(time_matrix)
   }
- 
-  
+
   if (sparse == FALSE){
     print("matrix nonsparse")
     tic()
@@ -83,29 +72,40 @@ computeResidualReturn = function(dt, values,dir,trimOutliers = NULL,sparse =TRUE
     toc()
     return(time_matrix)
   }
+  
   else{
     print("matrix sparse")
     tic()
     time_matrix=MatrixMaker2(timeIdx,dt)
     toc()
-    id=Sys.getpid()
+    id=Sys.getpid() #get session id so it doesn't get lost which dataframe is which in parralelization
     saveRDS(time_matrix,paste0(dir,values,'__',id,".RDS"))
     #save y-val
     saveRDS(dt$y,paste0(dir,"y_vals/",values,'__',id,"_y.RDS"))
     return()
   }
-
- 
- 
 }
+
+#Parallel call
+main =function(dataframes,values,dir){
+  iterations=length(dataframes)
+  id=Sys.getpid()
+  saveRDS(dataframes,paste0(dir,id,".RDS"))
+  for (x in 1:iterations){
+    computeResidualReturn(dataframes[[x]],values=x,dir)
+  }
+}
+
 #####################################################################################
-#Running function parallelized
-#non cluster version 
-# print("Non cluster run")
-# tic()
-# q=main(sorted_dfs[[1]])
-# toc()
-# print("Non cluster run")
+#Running function parallelized vs non-parallelizized
+#non cluster version on a single dataframe
+print("Non cluster run")
+tic()
+q=main(sorted_dfs[[1]])
+toc()
+
+#Cluster run on all dataframes
+print("Cluster run")
 value=1
 tic()
 print("setting Up cluster")#executes in 15 min
@@ -121,9 +121,8 @@ stopCluster(cl)
 print("done Executing")
 toc()
 
-
-
-###Data checks, confirming which rat/liq/mat cat went to which file
+#####################################################################################
+#Data checks, confirming which rating/liquidity/maturity category went to which file
 
 #Finding which chunk the files written to came from out of the larger list of list of dataframes
 group_Finder = function(dataframes,larger_df_list){
@@ -134,7 +133,7 @@ group_Finder = function(dataframes,larger_df_list){
   }
 }
 
-#for an individual file named via the session_id it was ran and its identifier of index, create a non sparse matrix and compare the results
+#For an individual file named via the session_id it was ran and its identifier of index, create a non sparse matrix and compare the results
 compareMatricesIndiv= function(all_dfs,df_to_check,session_id){
   sparse_to_full=data.frame(as.matrix(readRDS(paste0(data_dir,df_to_check,"__",session_id,".RDS"))))
   group=readRDS(paste0(data_dir,session_id,".RDS"))
@@ -148,7 +147,7 @@ compareMatricesIndiv= function(all_dfs,df_to_check,session_id){
   }
 }
 
-#run the comparison across all the dfs assigned to that session id
+#Run the comparison across all the dfs assigned to that session id
 compareMatricesAll = function(all_dfs,session_id,dir){
   files=grep(as.character(session_id),list.files(dir),value=TRUE)
   files=gsub(paste0(as.character(session_id),".RDS"),"",files)
@@ -159,7 +158,7 @@ compareMatricesAll = function(all_dfs,session_id,dir){
   
 }
 
-#finding session id numbers
+#Finding session id numbers
 files=grep("__",list.files(data_dir),value=TRUE)
 files=setdiff(list.files(data_dir),files)
 files=gsub(".RDS","",files)
@@ -167,13 +166,13 @@ sessions=as.numeric(files)
 sessions=sessions[!is.na(sessions)]
 compareMatricesIndiv(sorted_dfs,10,sessions[[1]])
 compareMatricesIndiv(sorted_dfs,10,sessions[[4]])
-# 
-#compareMatricesAll(sorted_dfs,sessions[[2]],data_dir)
-#compareMatricesAll(sorted_dfs,sessions[[3]],data_dir)
+ 
+compareMatricesAll(sorted_dfs,sessions[[2]],data_dir)
+compareMatricesAll(sorted_dfs,sessions[[3]],data_dir)
 
 
 
-#WHICH CATEGORY is which dataframe
+#Which category is which dataframe, the y values (bond returns), naming the files as such
 saveNames_y= function(all_dfs,session_id){
   group=readRDS(paste0(data_dir,session_id,".RDS"))
   group_number=group_Finder(all_dfs,group)
@@ -193,12 +192,12 @@ saveNames_y= function(all_dfs,session_id){
     system(paste0('mv ',session_name," ",new_dir))
   }
 }
+
 for (x in sessions){
   saveNames_y(sorted_dfs,x)
 }
 
-
-
+#Which category is which dataframe, the matrices, naming the files as such
 saveNames= function(all_dfs,session_id){
   group=readRDS(paste0(data_dir,session_id,".RDS"))
   group_number=group_Finder(all_dfs,group)
@@ -220,6 +219,7 @@ for (x in sessions){
   saveNames(sorted_dfs,x)
 }
 
+#Moving session id files to a new folder called sessions
 for (x in sessions){
   session_name=paste0(data_dir,x,".RDS")
   new_dir= paste0(data_dir,"sessions/")
