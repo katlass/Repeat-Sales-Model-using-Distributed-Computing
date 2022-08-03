@@ -1,4 +1,4 @@
-#This load balances by putting the largest dataframes first for each chunk, this speeds up parallelization.
+#This load balances by putting the largest dataframes first for each chunk, this speeds up parallelization. 
 LB_chunker = function(chunks=5,combo_names){
   nrows_df=as.numeric(lapply(dfs,nrow))
   dataframes=dfs[order(nrows_df,decreasing = TRUE)]
