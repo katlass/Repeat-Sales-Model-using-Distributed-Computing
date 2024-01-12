@@ -32,7 +32,7 @@ Data structure key: matrix row is first trade of bond, look at last trade, compu
 -Then pass this collinear removed sparse matrix to lm.fit.sparse <br>
 
 ### Use: <br>
--Create a dummy for each date for every security having higher than normal returns for their market segments.  <br>
+-Created a dummy for each date for every security having higher than normal returns for their market segments.  <br>
 -Used this information to enhance the current model for predicting returns for individual securities. MAE was reduced by around 5% on average. Deemed practically significant. <br>
 -Runs quickly, set up an ETL to run daily at market close before other models.  <br>
 -Executes in about 8 hours. This allows it to be incorporated in the model ran at market open the next day. <br>
