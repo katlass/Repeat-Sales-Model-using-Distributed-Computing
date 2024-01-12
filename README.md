@@ -5,19 +5,19 @@ Data structure key: matrix row is first trade of bond, look at last trade, compu
 
 ### Data Extraction Methodology: <br>
 -Use SLURM to manage and schedule Linux clusters. Computations will be distributed to 36 nodes. <br>
--Start with our massive corporate bond database, use SQL to extract 50 million lines  <br>
+-Start with our massive corporate bond database, use SQL to extract 50 million lines.  <br>
 -Segment the dataset where it meets certain rating, maturity, and liquidity constraints, there are 72 separate combinations. Do this via parallelization in R. <br>
--This ended up running faster than running parallelized SQL statements with WHERE conditions  <br>
+-This ended up running faster than running parallelized SQL statements with WHERE conditions.  <br>
 
-### Repeat Sales Model - How it works: <br>
--Assign 1 for the periods after the first sale until the second sale, and zero otherwise <br>
--Run a regression on this matrix for 4,000 days and 800,000+ securities, 72 different times for every subset of the market <br>
--Individual Return Predictions: There is a coefficient for each date. Multiply the coefficients by the time matrix  <br>
--For individual security/date, sums across the row the cofficents and subtract them from the return on the bond in that time frame. Results in prediction for each row of the return for that security/date  <br>
--Return On Market: model coefficients for each date serve as the return for the market on that date <br>
+### Repeat Sales Model - How it Works: <br>
+-Assign 1 for the periods after the first sale until the second sale, and zero otherwise. <br>
+-Run a regression on this matrix for 4,000 days and 800,000+ securities, 72 different times for every subset of the market. <br>
+-Individual return predictions: there is a coefficient for each date; multiply the coefficients by the time matrix.  <br>
+-For individual security/date, sum the cofficents across the row and subtract them from the return on the bond in that time frame. Results in prediction for each row of the return for that security/date.  <br>
+-Return on market: model coefficients for each date serve as the return for the market on that date. <br>
 
 ### Repeat Sales Model Methodology: <br>
--Chunk and parallelize the data for each bond type and construct a matrix for all days in the 12 year period, about 4000 columns by all CUSIP/dates for that category, around 800,000+ rows. Matrices larger than 8 GB, 1 billion items each.  <br>
+-Chunk and parallelize the data for each bond type and construct a matrix for all days in the 12 year period, about 4000 columns by all CUSIP/dates for that category, around 800,000+ rows. Matrices larger than 8 GB, 1 billion items each. 1 TB of data total for all combinations.  <br>
 -Huge matrices made parallelization impractical, circumventing this by writing to a sparse matrix, which vastly reduced the size and allowed take advantage of parallelization. <br>
 -Took instead of 15 seconds each so about 20 minutes, to less about 8 minutes with distributed computing. <br>
 
