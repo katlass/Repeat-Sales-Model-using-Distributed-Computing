@@ -19,7 +19,7 @@ Data structure key: matrix row is first trade of bond, look at last trade, compu
 ### Repeat Sales Model Methodology: <br>
 -Chunk and parallelize the data for each bond type and construct a matrix for all days in the 12 year period, about 4000 columns by all CUSIP/dates for that category, around 800,000+ rows. Matrices larger than 8 GB, 1 billion items each. 1 TB of data total for all combinations.  <br>
 -Huge matrices made parallelization impractical, circumventing this by writing to a sparse matrix, which vastly reduced the size and allowed take advantage of parallelization. <br>
--Took instead of 15 seconds each so about 20 minutes, to less about 8 minutes with distributed computing. <br>
+-Execution time reduced from 20 to 8 minutes with distributed computing. <br>
 
 ### Major Bottleneck: <br>
 -Can't use standard R’s stats lm.fit() on a matrix with a billion elements.  <br>
