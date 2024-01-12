@@ -1,9 +1,7 @@
 ## Forecasting Corporate Bond Returns with a Repeat Sales Model on 72 Distinct, Billion Item Matrices ~ 1TB
-As part of FED research with Ivan Ivanov: I looked to estimate returns on different subsets of the corporate bond market over a 12 years period using a repeat sales model derived from a 50 million item dataset. 
-This methodology is generally used to construct an index of prices or returns for unique, infrequently traded assets like houses or securities which are likely to be prone to exhibit serial correlation in returns.  
-No one knows true price of a house, you look at houses in same area that look similar to yours that sold for some amount. No two houses are the same.  
-This model eliminates the problem of accounting for return differences in bonds with varying characteristics. 
-Matrix row: first trade of bond, look at last trade, compute return from the first to the last trade, and estimating the return on the market at that time is a function of all these other bonds in that neighborhood. 
+As part of FED research with Ivan Ivanov, I looked to estimate returns on different subsets of the corporate bond market over a 12 years period using a repeat sales model derived from a 50 million item dataset. 
+This methodology is generally used to construct an index of prices or returns for unique, infrequently traded assets like houses or securities which are likely to be prone to exhibit serial correlation in returns. No one knows true price of a house, you look at houses in same area that look similar to yours that sold for some amount. No two houses are the same. This model eliminates the problem of accounting for return differences in bonds with varying characteristics. 
+Data structure key: Matrix row is first trade of bond, look at last trade, compute return from the first to the last trade, and estimating the return on the market at that time is a function of all these other bonds in that neighborhood. 
 
 Data Extraction Methodology: <br>
 -Use SLURM to manage and schedule Linux clusters. Computations will be distributed to 36 nodes. <br>
