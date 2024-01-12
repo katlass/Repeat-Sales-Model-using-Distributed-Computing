@@ -4,7 +4,7 @@ This methodology is generally used to construct an index of prices or returns fo
 Data structure key: matrix row is first trade of bond, look at last trade, compute return from the first to the last trade, and estimating the return on the market at that time is a function of all these other bonds in that neighborhood. 
 
 ### Data Extraction Methodology: <br>
--Use SLURM to manage and schedule Linux clusters. Computations will be distributed to 36 nodes. <br>
+-Use SLURM to manage and schedule Linux clusters. Computations will be distributed to 10 nodes. <br>
 -Start with our massive corporate bond database, use SQL to extract 50 million lines.  <br>
 -Segment the dataset where it meets certain rating, maturity, and liquidity constraints, there are 72 separate combinations. Do this via parallelization in R. <br>
 -This ended up running faster than running parallelized SQL statements with WHERE conditions.  <br>
