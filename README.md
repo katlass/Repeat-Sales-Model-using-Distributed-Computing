@@ -46,5 +46,5 @@ See more of my Fed projects here:
 
 [Web scraping commercial paper and negotiable certificates of deposit data from the SEC EDGAR public website](https://github.com/katlass/Web-Scraping-SEC-Data)
 
-[Text Classification: Fast, custom string similarity functions in Python mapping lambda functions to NumPy arrays, assigning issuers to one of 10,000 classes](https://github.com/katlass/String-Similarity-Custom-Functions)
+[Custom string similarity functions in Python mapping lambda functions to NumPy arrays, assigning issuers to one of 10,000 classes](https://github.com/katlass/String-Similarity-Custom-Functions)
 
